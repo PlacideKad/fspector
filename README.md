@@ -1,0 +1,1 @@
+fspector is a system tool built in C which inspects files and directories to printout informations.about them
