@@ -5,6 +5,7 @@
 #include <grp.h>
 #include <dirent.h>
 #include "octal_permission_converter.h"
+#include "directory_printer.h"
 
 int main(int argc, char* argv[]){
   char* file_path;
@@ -45,10 +46,13 @@ int main(int argc, char* argv[]){
           perror("Could not open the directory\n");
           return EXIT_FAILURE;
         }
-
+        char** filename_list;
+        int n_content=0;
         while((entry=readdir(dp))!=NULL){
-          printf("%s\n",entry->d_name);
+          filename_list[n_content]=entry->d_name;
+          n_content++;
         }
+        directory_printer(filename_list,n_content);
         closedir(dp);
       }else{
         return EXIT_FAILURE;
