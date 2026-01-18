@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <grp.h>
+#include "octal_permission_converter.h"
 
 int main(int argc, char* argv[]){
   char* file_path;
@@ -13,7 +14,8 @@ int main(int argc, char* argv[]){
     if(stat(file_path,&file_infos)==0){
       char file_type_bit='-';
       char* permissions_bits;
-      int permissions=(int)file_infos.st_mode & 0777;
+      int permissions=file_infos.st_mode & 0777;
+      permissions_bits=converter(permissions);
       long int file_size=file_infos.st_size;
       struct group* grp=getgrgid(file_infos.st_gid);
       struct passwd* pwd=getpwuid(file_infos.st_uid);
@@ -23,7 +25,9 @@ int main(int argc, char* argv[]){
         if(lstat(file_path,&link_infos)==0){
           if(S_ISLNK(link_infos.st_mode)){
             file_type_bit='l';
-            permissions=(int)link_infos.st_mode & 0777;
+            permissions=link_infos.st_mode & 0777;
+            printf("%d\n",permissions);
+            permissions_bits=converter(permissions);
           }
         }
       }else if(S_ISDIR(file_infos.st_mode)){
@@ -31,7 +35,8 @@ int main(int argc, char* argv[]){
       }else{
         return EXIT_FAILURE;
       }
-      printf("%c%o \t %s \t %s \t %ldB\n",file_type_bit,permissions,pwd->pw_name,grp->gr_name,file_size);
+      printf("%c%s \t %s \t %s \t %ldB\n",file_type_bit,permissions_bits,pwd->pw_name,grp->gr_name,file_size);
+      free(permissions_bits);
     }else{
       printf("Error: fspector: can't find %s\n",file_path);
       return EXIT_FAILURE;
